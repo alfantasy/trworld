@@ -85,6 +85,8 @@ class Database:
                                   user_id INTEGER,
                                   skill_id INTEGER,
                                   skill_level INTEGER,
+                                  price_upgrade INTEGER,
+                                  procent INTEGER,
                                   FOREIGN KEY(user_id) REFERENCES users(id),
                                   FOREIGN KEY(skill_id) REFERENCES skills(id)
                                   );''')
@@ -95,10 +97,9 @@ class Database:
                                   name TEXT,
                                   description TEXT,
                                   type TEXT,
-                                  level INTEGER,
-                                  exp INTEGER,
-                                  price_upgrade INTEGER,
-                                  price INTEGER,
+                                  max_level INTEGER,
+                                  price_exp_upgrade INTEGER,
+                                  price_exp_to_get INTEGER,
                                   required_level INTEGER);''')
         
         ## Создание таблицы с битвами ##
