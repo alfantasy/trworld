@@ -16,7 +16,4 @@ ENV/
 # System files
 .DS_Store
 Thumbs.db
-
-# Last
-s.txt
 database.db
