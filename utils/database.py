@@ -239,9 +239,11 @@ class Database:
                                   type TEXT,
                                   rarity TEXT,
                                   stats TEXT,
+                                  caliber TEXT,
                                   description TEXT,
                                   can_sell BOOLEAN,
-                                  can_trade BOOLEAN);''')
+                                  can_trade BOOLEAN,
+                                  can_craft BOOLEAN);''')
 
         await self.connection.commit()        
 
