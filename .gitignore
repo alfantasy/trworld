@@ -6,6 +6,7 @@ __pycache__/
 # Virtual Env
 venv/
 .venv/
+pyvenv.cfg
 ENV/
 
 #IDE
@@ -15,3 +16,7 @@ ENV/
 # System files
 .DS_Store
 Thumbs.db
+
+# Last
+s.txt
+database.db
