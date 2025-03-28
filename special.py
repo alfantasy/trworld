@@ -665,14 +665,15 @@ async def run():
         type = item[2]
         rarity = item[3]
         stats = item[4]
-        description = item[5]
-        can_sell = item[6]
-        can_trade = item[7]
-        can_craft = item[8]
+        caliber = items[5]
+        description = item[6]
+        can_sell = item[7]
+        can_trade = item[8]
+        can_craft = item[9]
         await cursor.execute('''INSERT OR IGNORE INTO items
-                             (id, name, type, rarity, stats, description, can_sell, can_trade, can_craft)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);''',
-                             (ids, name, type, rarity, stats, description, can_sell, can_trade, can_craft))
+                             (id, name, type, rarity, stats, caliber, description, can_sell, can_trade, can_craft)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''',
+                             (ids, name, type, rarity, stats, caliber, description, can_sell, can_trade, can_craft))
 
     #await cursor.execute('UPDATE locations SET description = ? WHERE id = 1;', (desc_loc,))
     # await cursor.execute('''INSERT OR IGNORE INTO items
