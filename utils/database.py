@@ -38,11 +38,14 @@ class Database:
                                   health INTEGER,
                                   max_health INTEGER,
                                   energy INTEGER,
+                                  max_energy INTEGER,
                                   faction INTEGER,
                                   clan_id INTEGER,
                                   squad_id INTEGER,
                                   quest_current INTEGER,
-                                  full_stats TEXT,
+                                  max_height INTEGER,
+                                  satiety INTEGER,
+                                  hydration INTEGER,
                                   current_location INTEGER NOT NULL,
                                   vip INTEGER,
                                   vip_time TEXT,
@@ -87,7 +90,7 @@ class Database:
                                   skill_id INTEGER,
                                   skill_level INTEGER,
                                   price_upgrade INTEGER,
-                                  procent INTEGER,
+                                  procent FLOAT,
                                   FOREIGN KEY(user_id) REFERENCES users(id),
                                   FOREIGN KEY(skill_id) REFERENCES skills(id)
                                   );''')
@@ -276,13 +279,14 @@ class Database:
             'items': [(1, 1), (2, 1)],  # (item_id, quantity)
             'skills': [1, 2]  # skill_ids
         }
+
         await self.cursor.execute('''
             INSERT INTO users (
                 user_id, tg_username, nickname, level, level_exp, skill_exp, money, health,
-                max_health, energy, current_location
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                max_health, energy, max_energy, max_height, satiety, hydration, current_location
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             ''', (user_id, tg_username, nickname, 1, 0, 0, START_CONFIG['money'], 
-            START_CONFIG['health'], START_CONFIG['max_health'], 10, START_CONFIG['location']))
+            START_CONFIG['health'], START_CONFIG['max_health'], 10, 10, 25, 20, 20, START_CONFIG['location']))
 
         await self.cursor.execute("SELECT id FROM users WHERE user_id = ?", (user_id,))
         user_db_id = (await self.cursor.fetchone())[0]        
@@ -294,11 +298,13 @@ class Database:
                 ''', (user_db_id, item_id, quantity))
         
         for skill_id in START_CONFIG['skills']:
-            procent = self.get_basic_procent_skill(skill_id)
+            procent = await self.get_basic_procent_skill(skill_id)
             data_skill = await self.get_skill(skill_id)
+            print(data_skill[5])
+            print(procent)
             await self.cursor.execute('''
-                INSERT INTO user_skills (user_id, skill_id, skill_level, price_upgrade, project) VALUES (?, ?, ?);
-                ''', (user_db_id, skill_id, 1, data_skill[5], procent if procent else 0))
+                INSERT INTO user_skills (user_id, skill_id, skill_level, price_upgrade, procent) VALUES (?, ?, ?, ?, ?);
+                ''', (user_db_id, skill_id, 1, data_skill[5], procent if procent else 0,))
         await self.connection.commit()
         return True
     
