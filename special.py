@@ -311,6 +311,7 @@ async def run():
     #await add_craft_recipe(cursor, await get_items_to_recipe(cursor))
     #await add_skills(cursor)
     await drop_users_tables(cursor)
+    
     await connection.commit()
     await connection.close()
 asyncio.run(run())
