@@ -32,6 +32,7 @@ class Database:
                                   nickname TEXT,
                                   level INTEGER,
                                   level_exp INTEGER,
+                                  skill_exp INTEGER,
                                   money INTEGER,
                                   donate_money INTEGER,
                                   health INTEGER,
@@ -277,10 +278,10 @@ class Database:
         }
         await self.cursor.execute('''
             INSERT INTO users (
-                user_id, tg_username, nickname, level, level_exp, money, health,
+                user_id, tg_username, nickname, level, level_exp, skill_exp, money, health,
                 max_health, energy, current_location
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            ''', (user_id, tg_username, nickname, 1, 0, START_CONFIG['money'], 
+            ''', (user_id, tg_username, nickname, 1, 0, 0, START_CONFIG['money'], 
             START_CONFIG['health'], START_CONFIG['max_health'], 10, START_CONFIG['location']))
 
         await self.cursor.execute("SELECT id FROM users WHERE user_id = ?", (user_id,))
@@ -291,10 +292,13 @@ class Database:
             await self.cursor.execute('''
                 INSERT INTO inventory_users (user_id, item_id, quantity) VALUES (?, ?, ?);
                 ''', (user_db_id, item_id, quantity))
+        
         for skill_id in START_CONFIG['skills']:
+            procent = self.get_basic_procent_skill(skill_id)
+            data_skill = await self.get_skill(skill_id)
             await self.cursor.execute('''
-                INSERT INTO user_skills (user_id, skill_id, skill_level) VALUES (?, ?, ?);
-                ''', (user_db_id, skill_id, 1))
+                INSERT INTO user_skills (user_id, skill_id, skill_level, price_upgrade, project) VALUES (?, ?, ?);
+                ''', (user_db_id, skill_id, 1, data_skill[5], procent if procent else 0))
         await self.connection.commit()
         return True
     
@@ -355,9 +359,26 @@ class Database:
         return items
     ## Работа с таблицей inventory ##
 
-
     ## Работа с таблицей locations ##
     async def get_location(self, location_id: int):
         await self.cursor.execute("SELECT * FROM locations WHERE id = ?", (location_id,))
         return await self.cursor.fetchone()
     ## Работа с таблицей locations ##
+
+    ## Работа с таблицей skills ##
+    async def get_skill(self, skill_id: int):
+        await self.cursor.execute("SELECT * FROM skills WHERE id = ?", (skill_id,))
+        return await self.cursor.fetchone()
+    
+    async def get_basic_procent_skill(self, skill_id: int):
+        await self.cursor.execute("SELECT description FROM skills WHERE id = ?", (skill_id,))
+        desc = (await self.cursor.fetchone())[0]
+        if "% за уровень" in desc:
+            import re
+            match = re.search(r'(\d+\.?\d*)% за уровень', desc)
+            if match:
+                percent_per_level = float(match.group(1))
+            return percent_per_level
+        else: 
+            return False
+    ## Работа с таблицей skills ##
