@@ -185,6 +185,69 @@ class Database:
                                   time_limit TEXT,
                                   FOREIGN KEY(npc_id) REFERENCES npc(id));''')
         
+        ## Создание таблицы с квестами игроков ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS user_quests (
+                                  user_id INTEGER NOT NULL,
+                                  quest_id INTEGER NOT NULL,
+                                  current_stage_id INTEGER,
+                                  is_completed BOOLEAN DEFAULT FALSE,
+                                  start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  complete_time TIMESTAMP,
+                                  FOREIGN KEY(user_id) REFERENCES users(id),
+                                  FOREIGN KEY(quest_id) REFERENCES quests(id),
+                                  FOREIGN KEY(current_stage_id) REFERENCES quest_stages(id),
+                                  PRIMARY KEY (user_id, quest_id)
+                                  );''')
+        
+        ## Создание таблицы с сохранением прогресса по подзадачам квестов игроков ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS user_quest_objectives (
+                                  user_id INTEGER NOT NULL,
+                                  objective_id INTEGER NOT NULL,
+                                  current_progress INTEGER DEFAULT 0,
+                                  is_completed BOOLEAN DEFAULT FALSE,
+                                  FOREIGN KEY(user_id) REFERENCES users(id),
+                                  FOREIGN KEY(objective_id) REFERENCES quest_objectives(id),
+                                  PRIMARY KEY (user_id, objective_id)
+                                  );''')
+        
+        ## Создание таблицы с описанием и хранением этапов квестов ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS quest_stages (
+                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                  quest_id INTEGER NOT NULL,
+                                  stage_number INTEGER NOT NULL,
+                                  name TEXT NOT NULL,
+                                  description TEXT,
+                                  required_stage_id INTEGER,
+                                  is_optional BOOLEAN DEFAULT FALSE,
+                                  FOREIGN KEY(quest_id) REFERENCES quests(id),
+                                  UNIQUE (quest_id, stage_number)
+                                  );''')
+        
+        ## Создание таблицы с описанием и хранением подзадач квестов ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS quest_objectives (
+                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                  stage_id INTEGER NOT NULL,
+                                  objective_type TEXT NOT NULL,
+                                  target_id INTEGER,
+                                  target_value INTEGER,
+                                  current_value INTEGER DEFAULT 0,
+                                  is_hidden BOOLEAN DEFAULT FALSE,
+                                  FOREIGN KEY(stage_id) REFERENCES quest_stages(id)
+                                  );''')
+
+        ## Создание таблицы с сохранением прогресса по квестам игроков ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS quest_progress (
+                                  user_id INTEGER NOT NULL,
+                                  quest_id INTEGER NOT NULL,
+                                  current_step INTEGER DEFAULT 1,
+                                  is_completed BOOLEAN DEFAULT FALSE,
+                                  completion_data TEXT,
+                                  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  PRIMARY KEY (user_id, quest_id),
+                                  FOREIGN KEY(user_id) REFERENCES users(id),
+                                  FOREIGN KEY(quest_id) REFERENCES quests(id)
+                                  );''')
+        
         ## Создание таблицы с событиями ##
         await self.cursor.execute('''CREATE TABLE IF NOT EXISTS events (
                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -222,6 +285,15 @@ class Database:
                                   dialogue TEXT,
                                   hostility INTEGER,
                                   health INTEGER);''')
+        
+        ## Создание таблиц с описанием всех диалогов для NPC ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS dialogue_progress (
+                                  user_id INTEGER NOT NULL,
+                                  npc_id INTEGER NOT NULL,
+                                  dialogue_path TEXT NOT NULL,
+                                  current_node INTEGER DEFAULT 0,
+                                  PRIMARY KEY (user_id, npc_id, dialogue_path)
+                                  );''')
         
         ## Создание таблицы с локациями ## LOCATIONS
         await self.cursor.execute('''CREATE TABLE IF NOT EXISTS locations (

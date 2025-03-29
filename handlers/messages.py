@@ -1,6 +1,6 @@
 ## -- Главные импорты -- ##
 
-from aiogram import Router, types # Роутеры (гл. хэндлеры) и типов сообщений
+from aiogram import Router, types # Роутеры (гл. хэндлеры) и типы сообщений
 from aiogram.types import CallbackQuery, FSInputFile # Использование спец.типа реакции на нажатие по клавишам в сообщениях
 from aiogram import F # Магический фильтр
 from utils.texts import get_message_by, get_game_message_by # Функция по захвату текстовых переменных (сообщений)
@@ -138,26 +138,3 @@ async def read_inventory_item_select(callback: CallbackQuery, state: FSMContext)
         #await callback.message.edit_text(get_message_by('item_info', item_id), reply_markup=keyboard_return('item_info', user_id, item_id))
     else:
         await callback.answer('🚫 Это сообщение не для Вас.')
-
-## Игровой процесс ##
-@router.callback_query(F.data.startswith('start_game_first_'))
-async def read_start_game_first(callback: CallbackQuery, state: FSMContext):
-    user_id = callback.from_user.id
-    cuser_id = callback.data.split('_')[3]
-    if user_id == int(cuser_id):
-        await callback.message.edit_text(get_message_by('start_game_first'), reply_markup=game_keyboard('start_game_first', user_id, None))
-    else:
-        await callback.answer('🚫 Это сообщение не для Вас.')
-
-@router.callback_query(F.data.startswith('prology_0_'))
-async def read_prology_0(callback: CallbackQuery, state: FSMContext):
-    user_id = callback.from_user.id
-    cuser_id = callback.data.split('_')[2]
-    data = await db.get_location(1)
-    if user_id == int(cuser_id):
-        msg_id = await callback.message.answer_photo(photo=config["IMAGES"]["bereg"], caption=get_game_message_by('prology_0', data), reply_markup=game_keyboard('start_game_first', user_id, 'prology_0'))
-        #await callback.message.edit_text(get_game_message_by('prology_0'), reply_markup=game_keyboard('prology_0', user_id))
-    else:
-        await callback.answer('🚫 Это сообщение не для Вас.')
-
-## Игровой процесс ##
