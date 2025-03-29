@@ -106,150 +106,6 @@ async def add_craft_recipe(cursor, craft_ids):
 
 async def add_skills(cursor):
     skills = [
-        [
-            "Владение холодным оружием",
-            "Позволяет использовать холодное оружие. При улучшении уровня владения холодным оружием, меньше шанс промахнуться, упасть с более тяжелым оружием и выше шанс поставить критический урон.",
-            "Активное умение",
-            10,
-            5,
-            0,
-            1
-        ],
-        [
-            "Выносливость",
-            "Увеличивает максимальное количество энергии, понижает время восстановления энергии.",
-            "Пассивное умение",
-            10,
-            10,
-            0,
-            1
-        ],
-        [
-            "Владение огнестрельным оружием",
-            "Позволяет использовать огнестрельное оружие. При улучшении уровня владения оружием, меньше шанс промахнуться и выше шанс поставить критический урон.",
-            "Активное умение",
-            10,   
-            20,
-            10,
-            5
-        ],
-        [
-            "Максимальный вес",
-            "Увеличивает максимальный вес, который персонаж способен унести.",
-            "Пассивное умение",
-            10,
-            30,
-            0,
-            1
-        ],
-        [
-            "Крепость",
-            "Увеличивает здоровье персонажа.",
-            "Пассивное умение",
-            10,
-            50,
-            15,
-            10
-        ],
-        [
-            "Сила",
-            "Увеличивает силу персонажа.",
-            "Пассивное умение",
-            10,
-            50,
-            15,
-            10
-        ],
-        [
-            "Берсерк",
-            'Увеличивает урон в ближнем бою +2% за уровень, но снижается при этом навыки "Крепость" на неопределенное количество поинтов (единиц опыта/уровня).',
-            "Пассивное умение",
-            10,
-            35,
-            10,
-            10
-        ],
-        [
-            "Мастерство крафта",
-            "Позволяет создавать более сложные предметы, увеличивая шанс создания предмета на +0.1% за уровень.",
-            "Пассивное умение",
-            10,
-            50,
-            25,
-            15
-        ],
-        [
-            "Инженер",
-            "Позволяет более рационально пользоваться инструментами, а также увеличивает шанс создания предмета на +0.5% за уровень.",
-            "Пассивное умение",
-            10,
-            75,
-            25,
-            15
-        ],
-        [
-            "Разбор предметов",
-            "Позволяет разбирать предметы.",
-            "Пассивное умение",
-            1,
-            0,
-            50,
-            20
-        ],
-        [
-            "Собиратель",
-            "Увеличивает шанс найти более редкий предмет на +0.1% за уровень.",
-            "Пассивное умение",
-            15,
-            50,
-            25,
-            8
-        ],
-        [
-            "Боевая медицина",
-            "Увеличивает восстановление здоровья в безопасной зоне на +0.5% за уровень.",
-            "Пассивное умение",
-            10,
-            25,
-            10,
-            10
-        ],
-        [
-            "Толстая кожа",
-            "Понижает количество получаемой радиации на +1% за уровень.",
-            "Пассивное умение",
-            10,
-            50,
-            15,
-            10
-        ],
-        [
-            'Меткий выстрел',
-            "Повышает шанс нанести критический урон на +0.5% за уровень.",
-            "Активное умение",
-            10,
-            65,
-            20,
-            15
-        ],
-        [
-            'Ремонт',
-            "Дает возможность ремонтировать предметы с прочностью (первый уровень). Далее эффективность ремонта повышается на +1% за уровень.",
-            "Пассивное умение",
-            10,
-            50,
-            50,
-            15
-        ],
-        [
-            'Контроль',
-            'Понижает отдачу на +0.5% за уровень.',
-            "Пассивное умение",
-            15,
-            25,
-            10,
-            10
-        ]
     ]
     for skill in skills:
         name = skill[0]
@@ -265,6 +121,120 @@ async def add_skills(cursor):
                             VALUES (?, ?, ?, ?, ?, ?, ?);''', 
                             (name, description, type, max_level, price_upgrade, 
                             price_get, required_level,))
+
+async def add_quest_stage(cursor):
+    await cursor.execute('''INSERT INTO quest_stages (quest_id, stage_number, name, description, trigger_type, trigger_target) 
+                        VALUES (?, ?, ?, ?, ?);''',
+                        (1, 1, "Пробуждение", "Первые минуты в абсолютно изменившимся мире", 'none', ''),
+                        (1, 2, "Поиск живого", "Найдите выжившего на просторах Красной улицы", 'none', ''),
+                        (1, 3, "Первая угроза", "Разберитесь с мутантом", 'kill', 'mutant_1'),
+                        (1, 4, "Разговор с Виктором", "Узнайте, что здесь произошло", 
+                        json.dumps(
+                            {"npc_id": 1,
+                            "required_node": "about_disaster"}
+                            ),
+                            'talk',
+                            '1:safe_place'       
+                        ),
+                        (1, 5, "Дорога к Рембранда", "Доберитесь до улицы, о которой Вам рассказал Виктор"),
+                        (1, 6, "Встреча с новыми людьми", "Решите конфликт."),
+                        (1, 7, "Остаток военской службы...", "Поговорите с ветераном"),
+                        (1, 8, "Бар Увикор", "Встретитесь в барменом"))
+
+async def add_quest(cursor):
+    await cursor.execute('''INSERT INTO quests (id, name, description, npc_id, reward, reward_exp, reward_money, reward_skills, reward_items, min_level, is_repeat, time_limit)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''',
+                        (1, "Первые шаги", "Адаптация в постапокалиптическом мире. Нужно узнать, что случилось с страной? Что происходит в мире? Неужели все настолько плохо?",
+                        None, "Деньги, опыт, базовые навыки, вещи", 10, 1000, "4", "74, strength=10", 1, False, 0)
+                    )
+
+async def add_mutant(cursor):
+    await cursor.execute('''INSERT INTO mutants (name, description, location, health, damage, items_to_drop)
+                        VALUES (?, ?, ?, ?, ?, ?);''',
+                        ("Обычный зомби", "Когда-то был обычным человеком, но превратился в зомби из-за катастрофы.", "All", 50, 3, "Нет")
+                        )
+    
+async def add_npc(cursor, name: str, description: str, location: int, items_on_person: list = None, items_on_sell: list = None, quests: list = None, dialogue: dict = None, hostility: int = 1, health: int = None):
+    if name == None:
+        return 'Не можем создать NPC без имени'
+    if quests == None:
+        quests = 'Нет'
+    if dialogue == None:
+        dialogue = 'Не разговорчив.'
+    if health == None:
+        health = 100
+    if items_on_person == None:
+        items_on_person = 'Нет'
+    if items_on_sell == None:
+        items_on_sell = 'Нет'
+    
+    await cursor.execute('''INSERT INTO npc (name, description, location, items_on_person, items_on_sell, quests, dialogue, hostility, health)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);''',
+                        (name, 
+                        description, 
+                        location, 
+                        json.dumps(items_on_person) if items_on_person != None else items_on_person, 
+                        json.dumps(items_on_sell) if items_on_sell != None else items_on_sell, 
+                        json.dumps(quests) if quests != None else quests, 
+                        json.dumps(dialogue) if dialogue != None else dialogue, 
+                        hostility, 
+                        health)
+                        )
+    
+async def add_enemies(cursor):
+    dialog = {
+        "default": {
+            "text": "Эй, кореш! Проход: 1000 баксов",
+            "answers": [
+                {"text": "У меня есть деньги", "next": "pay", "condition": "has_item:money:1000"},
+                {"text": "Я не буду платить, вообще!", "next": "refuse"},
+                {"text": "Может еще как-то договоримся?", "next": "negotiate"},
+            ]
+        },
+        "pay": {
+            "text": "Отличный выбор, давай, дуй теперь отсюда!",
+            "answers": [
+                {"text": "[Продолжить путь]", "next": "end", "action": "remove_item:money:1000"},
+            ]
+        },
+        "refuse": {
+            "text": "Да ты что!? Значит получай по морде, ублюдок еб*нный!",
+            "answers": [
+                {"text": "[Сразиться]", "next": "end", "action": "fight"}
+            ]
+        },
+        "negotiate": {
+            "text": "И как же ты хочешь договориться?",
+            "answers": [
+                {"text": "Вы же вроде, парни, хорошие, может пропустите так? Я только недавно очнулся", "next": "negotiate_0"},
+                {"text": "[Убежать]", "next": "end", "action": "escape"},
+                {"text": "[Сразиться]", "next": "end", "action": "fight"}
+            ]
+        },
+        "negotiate_0": {
+            "text": "Ну валяй, что еще скажешь?",
+            "answers": [
+                {"text": "У меня нет желания с Вами драться, да и денег у меня нет, поймите", "next": "negotiate_1"},
+                {"text": "Да, иди ты нах*й!", "next": "end", "action": "fight"},
+                {"text": "[Убежать]", "next": "end", "action": "escape"}
+            ]
+        },
+        "negotiate_1": {
+            "text": "Да бл*ть... Устал я от тебя, иди отсюда.",
+            "answers": [
+                {"text": "[Продолжить путь]", "next": "end"},
+            ]
+        }
+    }
+    await cursor.execute('''INSERT INTO enemies (name, description, dialogue, location, health, damage, items_to_drop)
+                        VALUES (?, ?, ?, ?, ?, ?, ?);''',
+                        ("Мародер", "Не пытается даже проявить человечность. Просто натуральный идиот, пытающийся взять с Вас все.", json.dumps(dialog), "All", 75, 5, "Нет")
+                        )
+
+class Droping:
+    async def drop(cursor, tb):
+        if tb == 'qstages':
+            await cursor.execute('DROP TABLE quest_stages;')
 
 async def run():
     connection = await aiosqlite.connect('database.db')
@@ -310,7 +280,119 @@ async def run():
 
     #await add_craft_recipe(cursor, await get_items_to_recipe(cursor))
     #await add_skills(cursor)
-    await drop_users_tables(cursor)
+
+    # dialog_for_victor = {
+    #     "default": {
+    #         "text": "Вы кто такой? Я никого не знаю здесь...",
+    #         "answers": [
+    #             {"text": "Что здесь произошло?", "next": "about_disaster"},
+    #             {"text": "Ты знаешь безопасное место?", "next": "safe_place"},
+    #             {"text": "У меня нет времени на разговоры.", "next": "end"}
+    #         ]
+    #     },
+    #     "about_disaster": {
+    #         "text": "Уже не помню. Перед моими глазами в мгновение ока все затмилось...",
+    #         "answers": [
+    #             {"text": "Кто это сделал?", "next": "who_did_it"},
+    #             {"text": "Где теперь безопасно?", "next": "safe_place"},
+    #             {"text": "Спасибо за информацию..", "next": "end"}
+    #         ]
+    #     },
+    #     "who_did_it": {
+    #         "text": "Как все говорят, точнее, у тех, у кого я спрашивал, это было правительство. Больше я ничего не знаю.",
+    #         "answers": [
+    #             {"text": "Ясно. Спасибо.", "next": "end"}
+    #         ]
+    #     },
+    #     "safe_place": {
+    #         "text": "Я и сам не знаю...",
+    #         "answers": [
+    #             {"text": "Ясно. Спасибо.", "next": "end"}
+    #         ]
+    #     }
+    # }
+
+    # await cursor.execute('''INSERT INTO npc (id, name, description, location, items_on_person, items_on_sell, quests, dialogue, hostility, health)
+    #                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''',
+    #                         (1, "Виктор", "Один из выживших, который стоит на нейтралитете и мало с кем разговаривает. От него можно узнать лишь то, что он жив.",
+    #                         1, json.dumps([53, 74, 77, 79, 81]), "Нет", json.dumps([1]), json.dumps(dialog_for_victor), 1, 100)
+    #                         )
+
+    # await add_npc(cursor,
+    #               "Мит",
+    #               "Бывший ветеран войны, который и так мало того, что повидал многое, так еще и остался в живых после катастрофы",
+    #               3,
+    #               [21, 50, 51, 79, 81],
+    #               None,
+    #               [1],
+    #               {
+    #                   "default": {
+    #                       "text": "Стой! Кто идет?",
+    #                       "answers": [
+    #                           {"text": "Простите, я только недавно очнулся. Не знаете, где здесь безопасное место?", "next": "info"},
+    #                           {"text": "Что здесь вообще происходит?", "next": "info"},
+    #                       ]
+    #                   },
+    #                   "info": {
+    #                       "text": "Как бы тебе сказать... Правительство сделало, что хотело. Мало того, что запустили ядерные боеголовки и неудачно, так еще и вирус распространился. Здесь уже не стоит оставаться, нужно уходить. Я знаю безопасное место, это Бар Увикор, он находится впереди, не спутаешь, там вывеска стоит и охрана, но ты спокойно войдешь, раз живой...",
+    #                       "answers": [
+    #                           {"text": "Спасибо, я тогда пойду..", "next": "end"},
+    #                       ]
+    #                   }
+    #               },
+    #               1, 
+    #               100)
+
+    # await add_npc(cursor, 
+    #               "Бармен Ник", 
+    #               "Обычный бармен, который выжил после катастрофы и владеет Увикором. Добрый мужик, который не откажет в помощи", 
+    #               4, 
+    #               None, 
+    #               None, 
+    #               [1],
+    #               {
+    #                   "default_for_quest_0": {
+    #                       "text": "Опа, привет! Я тебя что-то не припомню.. Как ты нашел нас?",
+    #                       "answers": [
+    #                           {"text": "Меня сюда военный направил, похож на ветерана.. ", "next": "welcome_to_bar"},
+    #                           {"text": "Просто искал убежище..", "next": "welcome_to_bar"},
+    #                       ]
+    #                   },
+    #                   "welcome_to_bar": {
+    #                       "text": "Здесь ты в безопасности.. Подходи, если хочешь что-то узнать, купить или выпить..",
+    #                       "answers": [
+    #                           {"text": "Хорошо, спасибо..", "next": "end", "action": "complete_quest:1"}
+    #                       ]
+    #                   }
+    #               },
+    #               1,
+    #               100)
+
+    # await cursor.execute('SELECT * FROM npc WHERE id = 1;')
+    # npc = await cursor.fetchone()
+    # items = json.loads(npc[4])
+    # for item in items:
+    #     await cursor.execute('SELECT * FROM items WHERE id = ?;', (item,))
+    #     item_info = await cursor.fetchone()
+    #     print(item_info[1])
+    # print(f'ID: {npc[0]}\nName: {npc[1]}\nDescription: {npc[2]}\nLocation: {npc[3]}\nItems on person: {npc[4]}\nItems on sell: {npc[5]}\nQuests: {npc[6]}\nDialogue: {npc[7]}\nHostility: {npc[8]}\nHealth: {npc[9]}')
+
+    # await cursor.execute('''INSERT INTO quest_objectives (stage_id, objective_type, target_id, target_value)
+    #                      VALUES (?, ?, ?, ?);''',
+    #                      (3, 'kill', 1, 1))
+    
+    # await add_enemies(cursor)
+    
+    # await cursor.execute('''INSERT INTO dialog_options (quest_stage_id, is_enemy, npc_id, text, next_stage_id) 
+    #                      VALUES 
+    #                      (6, 1, 1, "Напасть на мародеров", 7),
+    #                      (6, 1, 1, "Попытаться договориться", 7),
+    #                      (6, 1, 1, "Дать взятку", 7);''')
+    
+    # await cursor.execute('''INSERT INTO quest_branches (quest_id, from_stage_id, to_stage_id, condition_type, condition_value)
+    #                      VALUES
+    #                      (1, 6, 7, "choice", "{"options": [1, 2, 3]}"),
+    #                      (1, 6, 7, "combat", "{"enemy_id": 1, "win_stage": 7, "lose_stage": 5}");''')
     
     await connection.commit()
     await connection.close()

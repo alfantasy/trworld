@@ -50,8 +50,8 @@ def keyboard_return(id_keyboard, user_id, ids_request=None, data=None):
         )
         keyboard.row(
             InlineKeyboardButton(
-                text = 'Инвентарь',
-                callback_data = f'get_inventory_{user_id}'
+                text = 'Персонаж',
+                callback_data = f'get_character_{user_id}'
             )
         )
     elif id_keyboard == 'lore_game':
@@ -158,6 +158,25 @@ def keyboard_return(id_keyboard, user_id, ids_request=None, data=None):
                 callback_data = f'start_game_first_{user_id}'
             )
         )
+    elif id_keyboard == 'character':
+        keyboard.row(
+            InlineKeyboardButton(
+                text = 'Инвентарь',
+                callback_data = f'get_inventory_{user_id}'
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text = 'Навыки',
+                callback_data = f'get_skills_{user_id}'
+            )
+        )
+        keyboard.row(
+            InlineKeyboardButton(
+                text = '⬅️ Назад',
+                callback_data = f'welcome_start_{user_id}'
+            )
+        )
     elif id_keyboard == 'inventory':
         if data is not None:
             if ids_request == 'back':
@@ -193,8 +212,8 @@ def keyboard_return(id_keyboard, user_id, ids_request=None, data=None):
                 )
         keyboard.row(
             InlineKeyboardButton(
-                text = '⬅️ Назад на главную',
-                callback_data = f'welcome_start_{user_id}'
+                text = '⬅️ Назад',
+                callback_data = f'get_character_{user_id}'
             )
         )
     return keyboard.as_markup()

@@ -138,3 +138,13 @@ async def read_inventory_item_select(callback: CallbackQuery, state: FSMContext)
         #await callback.message.edit_text(get_message_by('item_info', item_id), reply_markup=keyboard_return('item_info', user_id, item_id))
     else:
         await callback.answer('🚫 Это сообщение не для Вас.')
+
+## Информация о персонаже
+@router.callback_query(F.data.startswith('get_character_'))
+async def read_character(callback: CallbackQuery, state: FSMContext):
+    user_id = callback.from_user.id
+    cuser_id = callback.data.split('_')[2]
+    if user_id == int(cuser_id):
+        await callback.message.edit_text('В разработке...', reply_markup=keyboard_return('character', user_id))
+    else:
+        await callback.answer('🚫 Это сообщение не для Вас.')

@@ -190,15 +190,100 @@ PvE предполагает совместное прохождение опр�
             text = 'Ваш инвентарь пуст.'
     elif mid == 'item_info_inv':
         if data[4] != 'Нет':
+            stats_item = ''
             stats_json = json.loads(data[4])
             print(type(stats_json))
             if data[2] == 'Оружие':
-                stats_item = f'''
-⋙ Урон: {stats_json["damage"]}
-⋙ Прочность: {stats_json["health"]}
-⋙ Трата энергии: {stats_json["energy"]}
-⋙ Скорость атаки: {stats_json["speed"]}
-'''
+                caliber = '⋙ Калибр: '
+                damage = '⋙ Урон: '
+                strength = '⋙ Прочность: '
+                energy_use = '⋙ Трата энергии: '
+                height = '⋙ Вес: '
+                range = '⋙ Дистанция атаки: '
+                ammo = '⋙ Патроны: '
+                reload = '⋙ Перезарядка: '
+                spread = '⋙ Разброс: '
+                if data[5] != 'Нет':
+                    stats_item += caliber + str(data[5])                
+                if stats_json["damage"] != 0:
+                    stats_item += damage + str(stats_json["damage"]) + '\n'
+                if stats_json["strength"] != 0:
+                    stats_item += strength + str(stats_json["strength"]) + '\n'
+                if stats_json["energy_use"] != 0:
+                    stats_item += energy_use + str(stats_json["energy_use"]) + '\n'
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+                if stats_json["range"] != 0:
+                    stats_item += range + str(stats_json["range"]) + '\n'
+                if stats_json["ammo"] != 0:
+                    stats_item += ammo + str(stats_json["ammo"]) + '\n'
+                if stats_json["reload"] != 0:
+                    stats_item += reload + str(stats_json["reload"]) + '\n'
+                if stats_json["spread"] != 0:
+                    stats_item += spread + str(stats_json["spread"]) + '\n'
+            elif data[2] == 'Броня':
+                strength = '⋙ Прочность: '
+                height = '⋙ Вес: '
+                armor_en = '⋙ Защита: '
+                type_armor = '⋙ Тип брони: '
+                armor_rebran = '⋙ Что защищает: '
+                if stats_json["strength"] != 0:
+                    stats_item += strength + str(stats_json["strength"]) + '\n'
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+                if stats_json["armor_en"] != 0:
+                    stats_item += armor_en + str(stats_json["armor_en"]) + '\n'
+                if stats_json["type_armor"]:
+                    stats_item += type_armor + str(stats_json["type_armor"]) + '\n'
+                if stats_json["armor_rebran"]:
+                    stats_item += armor_rebran + str(stats_json["armor_rebran"]) + '\n'
+            elif data[2] == 'Одежда':
+                strength = '⋙ Прочность: '
+                effect = '⋙ Эффект: '
+                height = '⋙ Вес: '
+                an_armor = '⋙ Доп.защита:'
+                if stats_json["strength"] != 0:
+                    stats_item += strength + str(stats_json["strength"]) + '\n'
+                if stats_json["effect"]:
+                    stats_item += effect + str(stats_json["effect"]) + '\n'
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+                if stats_json["an_armor"] != 0:
+                    stats_item += an_armor + str(stats_json["an_armor"]) + '\n'
+            elif data[2] == 'Еда':
+                height = '⋙ Вес: '
+                effect = '⋙ Эффект: '
+                food_to_heal = '⋙ Восстановление сытости: '
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+                if stats_json["effect"]:
+                    stats_item += effect + str(stats_json["effect"]) + '\n'
+                if stats_json["food_to_heal"] != 0:
+                    stats_item += food_to_heal + str(stats_json["food_to_heal"]) + '\n'
+            elif data[2] == 'Медикаменты':
+                height = '⋙ Вес: '
+                effect = '⋙ Эффект: '
+                health_to_heal = '⋙ Восстановление здоровья: '
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+                if stats_json["effect"]:
+                    stats_item += effect + str(stats_json["effect"]) + '\n'
+                if stats_json["health_to_heal"] != 0:
+                    stats_item += health_to_heal + str(stats_json["health_to_heal"]) + '\n'
+            elif data[2] == 'Ресурсы':
+                height = '⋙ Вес: '
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+            elif data[2] == 'Аксессуары':
+                strength = '⋙ Прочность: '
+                height = '⋙ Вес: '
+                effect = '⋙ Эффект: '
+                if stats_json["strength"] != 0:
+                    stats_item += strength + str(stats_json["strength"]) + '\n'
+                if stats_json["height"] != 0:
+                    stats_item += height + str(stats_json["height"]) + '\n'
+                if stats_json["effect"]:
+                    stats_item += effect + str(stats_json["effect"]) + '\n'
         else:
             stats_item = 'Нет'
         if data is not None:
@@ -207,7 +292,7 @@ PvE предполагает совместное прохождение опр�
 ├ Редкость: {data[3]}
 ├ Статистика: 
 {stats_item}
-└ Описание: {data[5]}
+└ Описание: {data[6]}
 
 Можно ли продавать (NPC): {"Да" if data[6] == 1 else "Нет"}
 Можно ли продавать (Аукцион): {"Да" if data[7] == 1 else "Нет"}

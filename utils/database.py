@@ -95,6 +95,18 @@ class Database:
                                   FOREIGN KEY(skill_id) REFERENCES skills(id)
                                   );''')
         
+        ## Создание таблицы для хранения состояния диалогов игрока ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS user_dialogs (
+                                  user_id INTEGER NOT NULL,
+                                  npc_id INTEGER NOT NULL,
+                                  current_node TEXT NOT NULL,
+                                  quest_stage_id INTEGER,
+                                  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                  FOREIGN KEY(user_id) REFERENCES users(id),
+                                  FOREIGN KEY(npc_id) REFERENCES npc(id),
+                                  PRIMARY KEY(user_id, npc_id)
+                                  );''')
+        
         ## Создание таблицы с навыками ##
         await self.cursor.execute('''CREATE TABLE IF NOT EXISTS skills (
                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -218,6 +230,8 @@ class Database:
                                   name TEXT NOT NULL,
                                   description TEXT,
                                   required_stage_id INTEGER,
+                                  trigger_type TEXT,
+                                  trigger_target TEXT,
                                   is_optional BOOLEAN DEFAULT FALSE,
                                   FOREIGN KEY(quest_id) REFERENCES quests(id),
                                   UNIQUE (quest_id, stage_number)
@@ -245,6 +259,31 @@ class Database:
                                   last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                   PRIMARY KEY (user_id, quest_id),
                                   FOREIGN KEY(user_id) REFERENCES users(id),
+                                  FOREIGN KEY(quest_id) REFERENCES quests(id)
+                                  );''')
+        
+        ## Создание таблицы с диалоговыми вариантами для квестов ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS dialog_options (
+                                  id INTEGER PRIMARY KEY,
+                                  quest_stage_id INTEGER,
+                                  is_enemy BOOLEAN DEFAULT FALSE,
+                                  npc_id INTEGER,
+                                  text TEXT,
+                                  next_stage_id INTEGER,
+                                  required_item_id INTEGER NULL,
+                                  FOREIGN KEY(quest_stage_id) REFERENCES quest_stages(id),
+                                  FOREIGN KEY(npc_id) REFERENCES npc(id),
+                                  FOREIGN KEY(required_item_id) REFERENCES items(id)
+                                  );''')
+        
+        ## Создание таблицы с особыми ветвлениями для квеста ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS quest_branches (
+                                  id INTEGER PRIMARY KEY,
+                                  quest_id INTEGER,
+                                  from_stage_id INTEGER,
+                                  to_stage_id INTEGER,
+                                  condition_type TEXT,
+                                  condition_value TEXT,
                                   FOREIGN KEY(quest_id) REFERENCES quests(id)
                                   );''')
         
@@ -286,6 +325,17 @@ class Database:
                                   hostility INTEGER,
                                   health INTEGER);''')
         
+        ## Создание обычных врагов ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS enemies (
+                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                  name TEXT,
+                                  description TEXT,
+                                  dialogue TEXT,
+                                  location INTEGER,
+                                  health INTEGER,
+                                  damage INTEGER,
+                                  items_to_drop TEXT);''')
+        
         ## Создание таблиц с описанием всех диалогов для NPC ##
         await self.cursor.execute('''CREATE TABLE IF NOT EXISTS dialogue_progress (
                                   user_id INTEGER NOT NULL,
@@ -294,6 +344,16 @@ class Database:
                                   current_node INTEGER DEFAULT 0,
                                   PRIMARY KEY (user_id, npc_id, dialogue_path)
                                   );''')
+        
+        ## Создание таблиц с описанием мутантов ##
+        await self.cursor.execute('''CREATE TABLE IF NOT EXISTS mutants (
+                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                  name TEXT,
+                                  description TEXT,
+                                  location TEXT,
+                                  health INTEGER,
+                                  damage INTEGER,
+                                  items_to_drop TEXT);''')
         
         ## Создание таблицы с локациями ## LOCATIONS
         await self.cursor.execute('''CREATE TABLE IF NOT EXISTS locations (
@@ -388,6 +448,10 @@ class Database:
         else:
             return None, False
 
+    async def get_current_quest_id(self, user_id: int):
+        await self.cursor.execute("SELECT quest_current FROM users WHERE user_id = ?", (user_id,))
+        return (await self.cursor.fetchone())[0]
+
     ## Работа с таблицей users ##
 
     ## Работа с таблицей inventory ##
@@ -460,3 +524,6 @@ class Database:
         else: 
             return False
     ## Работа с таблицей skills ##
+
+    ## Особый блок кода, отвечающий за полную работоспособность системы квестов ##    
+    ## Особый блок кода, отвечающий за полную работоспособность системы квестов ##
